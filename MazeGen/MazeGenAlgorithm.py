@@ -23,6 +23,8 @@ class node:
 
         self.visited = False
 
+        self.visitedByPath = False
+
         self.edge = False
 
         self.start = False
@@ -41,6 +43,8 @@ class node:
 
         self.distFromEnd = 0
 
+        self.totalDist = 0
+
     def findDistances(self, start, end,):
 
         startPos = start.getPosition()
@@ -49,9 +53,17 @@ class node:
 
         distFrom = Vector2Operators.sub(self.position, startPos)
 
+        self.distFromStart = Vector2Operators.length(distFrom)
+
         distTo = Vector2Operators.sub(endPosition, self.position)
 
+        self.distFromEnd = Vector2Operators.length(distTo)
 
+        self.totalDist = self.distFromEnd + self.distFromStart
+
+    def getDistances(self,):
+
+        return((self.distFromStart, self.distFromEnd, self.totalDist))
 
     def joinToParent(self,):
 
@@ -81,8 +93,7 @@ class node:
 
             if deltaPosition[1] < 0:
 
-                self.rectang[3] += 3
-
+                self.rectang[3] += 2
         
     def drawNode(self, screen):
 
@@ -105,15 +116,15 @@ class node:
             pygame.draw.rect(screen, (0, 0, 0), self.rectang, 0,)
     
     def getPosition(self,):
-        return(self.position)
+        return self.position
 
     def setEState(self, state,):
+
         self.edge = state
 
-
     def setEnd(self, state,):
-        self.end = state
 
+        self.end = state
 
     def getEState(self,):
         
@@ -128,8 +139,8 @@ class node:
         self.visited = data
 
     def setNeighbours(self, listData,):
-        self.neighbours = list(listData)
 
+        self.neighbours = list(listData)
 
     def addNeighbours(self, data,):
 
@@ -142,6 +153,13 @@ class node:
         
         return self.neighbours
 
+    def setVisitedByPath(self, state,):
+
+        self.visitedByPath = state
+
+    def getVisitedByPath(self,):
+
+        return self.visitedByPath
 
     def setStart(self, state,):
 
@@ -164,12 +182,12 @@ class node:
         return self.start
 
     def setParent(self, data):
-        self.parent = (data)
+
+        self.parent = data
 
     def getParent(self, ):
         
         return self.parent
-
 
 def removeRepeats(data):
     if len(data) >= 1:
@@ -187,7 +205,6 @@ def removeRepeats(data):
                     data.remove(data[j])
 
     return data 
-
 
 def getNeighbour(nodeMatrix):
     for x in range(len(nodeMatrix)):
@@ -249,7 +266,7 @@ def generateMazeBase(windowDimensions, nodeWidth, edges,):
 
             position = [xNode, yNode]
 
-            print((position, (xNode, yNode), (navWidth, navHeight),(xNode == navWidth),(yNode == navHeight)))
+            print(("segment: ", position, " data: ", (xNode, yNode), (navWidth, navHeight),(xNode == navWidth),(yNode == navHeight)))
 
             Node = node(position, nodeWidth)
 

@@ -8,9 +8,11 @@ import random
 
 import secrets
 
+from operator import attrgetter, pos
+
 pygame.init()
 
-windowDimensions = (600, 600)
+windowDimensions = (200, 200)
 
 bgColour = (8, 8, 8)
 
@@ -24,6 +26,8 @@ closedList = []
 
 possibleRoute = []
 
+path = []
+
 displayName = ("Random Maze Generation Version 0")
 
 displaySurface = pygame.display.set_mode(windowDimensions)
@@ -35,6 +39,8 @@ running = True
 mazeComplete = False
 
 mazeStart = None
+
+mazeEndSel = False
 
 mazeEnd = []
 
@@ -102,7 +108,50 @@ def randEdge():
 
 def aStarSearch(openList, closedList,):
 
-    pass
+    currentNode = min(openList, key=attrgetter('totalDist'))
+
+    posTemp = currentNode.getPosition()
+
+    pygame.draw.rect(displaySurface, (255, 0, 0), (posTemp[0]*10, posTemp[1]*10, 10, 10,), 0,)
+    
+    currentNode.setVisitedByPath(True)
+
+    closedList.append(currentNode)
+
+    openList.remove(currentNode)
+
+    if currentNode == mazeEnd:
+
+        while currentNode is not None:
+
+            print(currentNode, "is not end")
+
+            path.append(currentNode)
+
+            currentNode = currentNode.getParent()
+
+    else:
+
+        for node in currentNode.getNeighbours():
+
+            if not node.getEState():
+
+                if not node.getVisitedByPath():
+
+                    node.setVisitedByPath(True)
+
+                if node in closedList:
+
+                    continue
+
+                openList.append(node)
+
+        
+
+
+
+
+
 
 
 mazeStart = randEdge()
@@ -110,6 +159,10 @@ mazeStart = randEdge()
 
 
 possibleRoute.append(mazeStart)
+
+
+
+openList.append(mazeStart)
 
 
 
@@ -158,6 +211,23 @@ while running:
 
         checkPos(pygame.mouse.get_pos())
 
+    if mazeEndSel and mazeComplete:
+
+        aStarSearch(openList, closedList)
+
+        for i in openList:
+
+            posTemp = i.getPosition()
+
+            pygame.draw.rect(displaySurface, (16, 16, 240), (posTemp[0]*10, posTemp[1]*10 , 10, 10,), 0,)
+
+        for n in closedList:
+
+            posTemp = n.getPosition()
+
+            pygame.draw.rect(displaySurface, (255, 102, 0), (posTemp[0]*10, posTemp[1]*10, 10, 10,), 0,)
+
+
     mazeStart.drawNode(displaySurface)
 
     for event in pygame.event.get():
@@ -171,6 +241,13 @@ while running:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if pygame.mouse.get_pressed(num_buttons=3)[0] == True:
                 selectEndNode(pygame.mouse.get_pos())
+
+                for x in range(len(nodeMatrix)):
+                    for y in range(len(nodeMatrix[x])):
+                        if mazeComplete:
+                            nodeMatrix[x][y].findDistances(mazeStart, mazeEnd[0])
+
+                mazeEndSel = True
             
     
     pygame.display.flip()
