@@ -38,9 +38,9 @@ def length(Vector2D: tuple):
 
 def normalize(Vector2D: tuple):
 
-    VectNorm1 = Vector2D[0] / vec2.length(Vector2D)
+    VectNorm1 = Vector2D[0] / length(Vector2D)
 
-    VectNorm2 = Vector2D[1] / vec2.length(Vector2D)
+    VectNorm2 = Vector2D[1] / length(Vector2D)
 
     return(float (VectNorm1), float(VectNorm2))
 
