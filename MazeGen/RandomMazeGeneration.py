@@ -10,7 +10,7 @@ import secrets
 
 pygame.init()
 
-windowDimensions = (500, 400)
+windowDimensions = (1000, 900)
 
 bgColour = (8, 8, 8)
 
@@ -32,6 +32,27 @@ mazeComplete = False
 
 nodeMatrix = MazeGenAlgorithm.generateMazeBase(windowDimensions, 10, edges,)
 
+
+
+
+def checkPos(mousePosition):
+    
+    normalisedMousePosition = mousePosition[0]//10, mousePosition[1]//10
+
+    if not nodeMatrix[normalisedMousePosition[0]][normalisedMousePosition[1]].getEState():
+
+        pygame.draw.rect(displaySurface, (255, 91, 69), (normalisedMousePosition[0] * 10, normalisedMousePosition[1] * 10, 10, 10), 0,)
+
+
+
+
+def selectEndNode(mousePosition):
+
+    normalisedMousePosition = mousePosition[0]//10, mousePosition[1]//10
+
+
+
+
 def drawNodes(nodeMat):
 
     matrix = nodeMat
@@ -41,6 +62,9 @@ def drawNodes(nodeMat):
         for y in x:
 
             y.drawNode(displaySurface)
+
+
+
 
 def randEdge():
 
@@ -54,15 +78,21 @@ def randEdge():
 
     return mazeEdgeNode
 
+
+
+
 mazeStart = randEdge()
 
 possibleRoute.append(mazeStart)
 
-def randomPrimAlgo(possibleRoute,):
-    
-    if len(possibleRoute) > 0:
 
-        current = random.choice(possibleRoute)
+
+def randomPrimAlgo(possibleRoute, mazeState):
+
+
+    if len(possibleRoute) != 0:
+
+        current = secrets.choice(possibleRoute)
 
         current.setTraversable(True)
 
@@ -80,7 +110,33 @@ def randomPrimAlgo(possibleRoute,):
 
                 possibleRoute.append(neighbour)
 
+    else:
+        mazeState = not mazeState
+
+        return mazeState
+
+
+
+
 while running:
+
+
+    print(len(possibleRoute))
+
+
+    displaySurface.fill(bgColour)
+
+    drawNodes(nodeMatrix)
+
+    if not mazeComplete:
+
+        mazeComplete = randomPrimAlgo(possibleRoute, mazeComplete,)
+
+    else:
+
+        checkPos(pygame.mouse.get_pos())
+
+    mazeStart.drawNode(displaySurface)
 
     for event in pygame.event.get():
 
@@ -90,12 +146,8 @@ while running:
 
             sys.exit()
 
-    displaySurface.fill(bgColour)
-
-    drawNodes(nodeMatrix)
-
-    randomPrimAlgo(possibleRoute)
-
-    mazeStart.drawNode(displaySurface)
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            pass
+            
     
     pygame.display.flip()

@@ -27,6 +27,8 @@ class node:
 
         self.end = False
 
+        self.hovered = False
+
         self.rectang = [(self.position[0]*10) + 1, (self.position[1]*10) + 1, (self.width - 2), (self.width - 2)]
 
         self.traversableCol = (255, 255, 255)
