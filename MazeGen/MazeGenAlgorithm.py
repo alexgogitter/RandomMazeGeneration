@@ -72,6 +72,9 @@ class node:
     
             pygame.draw.rect(screen, (32, 255, 32), self.rectang, 0,)
 
+        elif self.end:
+            pygame.draw.rect(screen, (255, 16, 16), self.rectang, 0,)
+
         elif self.traversable:
             
             pygame.draw.rect(screen, self.traversableCol, self.rectang, 0,)
@@ -125,6 +128,14 @@ class node:
     def setStart(self, state,):
 
         self.start = state
+
+    def setEnd(self, state):
+
+        self.end = state
+
+    def getEnd(self,):
+        
+        return self.end
 
     def getStart(self,):
 

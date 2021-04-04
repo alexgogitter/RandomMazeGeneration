@@ -10,7 +10,7 @@ import secrets
 
 pygame.init()
 
-windowDimensions = (1000, 900)
+windowDimensions = (600, 600)
 
 bgColour = (8, 8, 8)
 
@@ -30,6 +30,10 @@ running = True
 
 mazeComplete = False
 
+mazeStart = None
+
+mazeEnd = []
+
 nodeMatrix = MazeGenAlgorithm.generateMazeBase(windowDimensions, 10, edges,)
 
 
@@ -41,15 +45,28 @@ def checkPos(mousePosition):
 
     if not nodeMatrix[normalisedMousePosition[0]][normalisedMousePosition[1]].getEState():
 
-        pygame.draw.rect(displaySurface, (255, 91, 69), (normalisedMousePosition[0] * 10, normalisedMousePosition[1] * 10, 10, 10), 0,)
+        pygame.draw.rect(displaySurface, (255, 91, 69, 10), (normalisedMousePosition[0] * 10, normalisedMousePosition[1] * 10, 10, 10), 2,)
 
 
 
 
 def selectEndNode(mousePosition):
+    if mazeComplete == True:
+        if len(mazeEnd) > 0:
 
-    normalisedMousePosition = mousePosition[0]//10, mousePosition[1]//10
+            for i in mazeEnd:
 
+                i.setEnd(False)
+
+        mazeEnd.clear()
+
+        normalisedMousePosition = mousePosition[0]//10, mousePosition[1]//10
+
+        node = nodeMatrix[normalisedMousePosition[0]][normalisedMousePosition[1]]
+
+        node.setEnd(True)
+
+        mazeEnd.append(node)
 
 
 
@@ -62,7 +79,6 @@ def drawNodes(nodeMat):
         for y in x:
 
             y.drawNode(displaySurface)
-
 
 
 
@@ -120,10 +136,6 @@ def randomPrimAlgo(possibleRoute, mazeState):
 
 while running:
 
-
-    print(len(possibleRoute))
-
-
     displaySurface.fill(bgColour)
 
     drawNodes(nodeMatrix)
@@ -147,7 +159,8 @@ while running:
             sys.exit()
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            pass
+            if pygame.mouse.get_pressed(num_buttons=3)[0] == True:
+                selectEndNode(pygame.mouse.get_pos())
             
     
     pygame.display.flip()
