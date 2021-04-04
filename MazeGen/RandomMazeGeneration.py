@@ -18,6 +18,10 @@ edges = []
 
 mazeList = []
 
+openList = []
+
+closedList = []
+
 possibleRoute = []
 
 displayName = ("Random Maze Generation Version 0")
@@ -38,7 +42,6 @@ nodeMatrix = MazeGenAlgorithm.generateMazeBase(windowDimensions, 10, edges,)
 
 
 
-
 def checkPos(mousePosition):
     
     normalisedMousePosition = mousePosition[0]//10, mousePosition[1]//10
@@ -49,9 +52,10 @@ def checkPos(mousePosition):
 
 
 
-
 def selectEndNode(mousePosition):
+
     if mazeComplete == True:
+
         if len(mazeEnd) > 0:
 
             for i in mazeEnd:
@@ -96,8 +100,14 @@ def randEdge():
 
 
 
+def aStarSearch(openList, closedList,):
+
+    pass
+
 
 mazeStart = randEdge()
+
+
 
 possibleRoute.append(mazeStart)
 

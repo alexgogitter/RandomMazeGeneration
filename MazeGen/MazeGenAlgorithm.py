@@ -1,6 +1,8 @@
 ##Maze Generation
 import pygame
 
+import Vector2Operators
+
 print("importing Maze Generation Version 0")
 
 
@@ -34,6 +36,22 @@ class node:
         self.traversableCol = (255, 255, 255)
 
         self.nonTraversableCol = (64, 64, 64)
+
+        self.distFromStart = 0
+
+        self.distFromEnd = 0
+
+    def findDistances(self, start, end,):
+
+        startPos = start.getPosition()
+
+        endPosition = end.getPosition()
+
+        distFrom = Vector2Operators.sub(self.position, startPos)
+
+        distTo = Vector2Operators.sub(endPosition, self.position)
+
+
 
     def joinToParent(self,):
 
