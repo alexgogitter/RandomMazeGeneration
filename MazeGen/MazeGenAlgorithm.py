@@ -288,8 +288,6 @@ def generateMazeBase(windowDimensions, nodeWidth, edges,):
 
             position = [xNode, yNode]
 
-            print(("segment: ", position, " data: ", (xNode, yNode), (navWidth, navHeight),(xNode == navWidth),(yNode == navHeight)))
-
             Node = node(position, nodeWidth)
 
             if position[0] == 0 or position[1] == 0: 
