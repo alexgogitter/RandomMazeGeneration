@@ -12,7 +12,7 @@ from operator import attrgetter, pos
 
 pygame.init()
 
-windowDimensions = (200, 200)
+windowDimensions = (1000,450)
 
 bgColour = (8, 8, 8)
 
@@ -42,6 +42,8 @@ mazeStart = None
 
 mazeEndSel = False
 
+pathFound = False
+
 mazeEnd = []
 
 nodeMatrix = MazeGenAlgorithm.generateMazeBase(windowDimensions, 10, edges,)
@@ -58,25 +60,6 @@ def checkPos(mousePosition):
 
 
 
-def selectEndNode(mousePosition):
-
-    if mazeComplete == True:
-
-        if len(mazeEnd) > 0:
-
-            for i in mazeEnd:
-
-                i.setEnd(False)
-
-        mazeEnd.clear()
-
-        normalisedMousePosition = mousePosition[0]//10, mousePosition[1]//10
-
-        node = nodeMatrix[normalisedMousePosition[0]][normalisedMousePosition[1]]
-
-        node.setEnd(True)
-
-        mazeEnd.append(node)
 
 
 
@@ -106,7 +89,7 @@ def randEdge():
 
 
 
-def aStarSearch(openList, closedList,):
+def aStarSearch(openList, closedList):
 
     currentNode = min(openList, key=attrgetter('totalDist'))
 
@@ -120,15 +103,22 @@ def aStarSearch(openList, closedList,):
 
     openList.remove(currentNode)
 
-    if currentNode == mazeEnd:
+    if currentNode == mazeEnd[0]:
 
-        while currentNode is not None:
 
-            print(currentNode, "is not end")
+        
+        pathState = True
+
+        while currentNode is not mazeStart:
 
             path.append(currentNode)
 
+            currentNode.setPath(True)
+
             currentNode = currentNode.getParent()
+
+        return pathState
+
 
     else:
 
@@ -146,12 +136,6 @@ def aStarSearch(openList, closedList,):
 
                 openList.append(node)
 
-        
-
-
-
-
-
 
 
 mazeStart = randEdge()
@@ -161,8 +145,33 @@ mazeStart = randEdge()
 possibleRoute.append(mazeStart)
 
 
+def selectEndNode(mousePosition):
 
-openList.append(mazeStart)
+    openList.clear()
+
+    closedList.clear()
+
+    
+    openList.append(mazeStart)
+
+    if mazeComplete == True:
+
+        if len(mazeEnd) > 0:
+
+            for i in mazeEnd:
+
+                i.setEnd(False)
+
+        mazeEnd.clear()
+
+        normalisedMousePosition = mousePosition[0]//10, mousePosition[1]//10
+
+        node = nodeMatrix[normalisedMousePosition[0]][normalisedMousePosition[1]]
+
+        node.setEnd(True)
+
+        mazeEnd.append(node)
+
 
 
 
@@ -179,6 +188,8 @@ def randomPrimAlgo(possibleRoute, mazeState):
 
         current.joinToParent()
 
+        MazeGenAlgorithm.getNeighbour(nodeMatrix, current)
+
         for neighbour in current.getNeighbours():
                 
             if not neighbour.getVisited() and not neighbour.getEState():
@@ -190,6 +201,7 @@ def randomPrimAlgo(possibleRoute, mazeState):
                 possibleRoute.append(neighbour)
 
     else:
+
         mazeState = not mazeState
 
         return mazeState
@@ -211,21 +223,21 @@ while running:
 
         checkPos(pygame.mouse.get_pos())
 
-    if mazeEndSel and mazeComplete:
+    if mazeEndSel and mazeComplete and not pathFound:
 
-        aStarSearch(openList, closedList)
+        pathFound = aStarSearch(openList, closedList)
 
         for i in openList:
 
             posTemp = i.getPosition()
 
-            pygame.draw.rect(displaySurface, (16, 16, 240), (posTemp[0]*10, posTemp[1]*10 , 10, 10,), 0,)
+            pygame.draw.rect(displaySurface, (16, 16, 240), ((posTemp[0]*10) + 1, (posTemp[1]*10) + 1 , 8, 8,), 0,)
 
         for n in closedList:
 
             posTemp = n.getPosition()
 
-            pygame.draw.rect(displaySurface, (255, 102, 0), (posTemp[0]*10, posTemp[1]*10, 10, 10,), 0,)
+            pygame.draw.rect(displaySurface, (255, 102, 0), ((posTemp[0]*10) + 1, (posTemp[1]*10) + 1 , 8, 8,), 0,)
 
 
     mazeStart.drawNode(displaySurface)
@@ -241,6 +253,13 @@ while running:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if pygame.mouse.get_pressed(num_buttons=3)[0] == True:
                 selectEndNode(pygame.mouse.get_pos())
+
+                pathFound = False
+
+                for i in path:
+                    i.setPath(False)
+
+                path.clear()
 
                 for x in range(len(nodeMatrix)):
                     for y in range(len(nodeMatrix[x])):

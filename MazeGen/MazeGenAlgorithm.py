@@ -35,6 +35,10 @@ class node:
 
         self.rectang = [(self.position[0]*10) + 1, (self.position[1]*10) + 1, (self.width - 2), (self.width - 2)]
 
+        self.inPath = False
+
+        self.pathCol = (64, 64, 255)
+
         self.traversableCol = (255, 255, 255)
 
         self.nonTraversableCol = (64, 64, 64)
@@ -97,24 +101,31 @@ class node:
         
     def drawNode(self, screen):
 
-        if self.start:
+        if self.start and not self.inPath:
     
             pygame.draw.rect(screen, (32, 255, 32), self.rectang, 0,)
 
-        elif self.end:
+        elif self.end and not self.inPath:
+
             pygame.draw.rect(screen, (255, 16, 16), self.rectang, 0,)
 
-        elif self.traversable:
+        elif self.traversable and not self.inPath:
             
             pygame.draw.rect(screen, self.traversableCol, self.rectang, 0,)
 
-        elif not self.traversable:
+        elif not self.traversable and not self.inPath:
 
             pygame.draw.rect(screen, self.nonTraversableCol, self.rectang, 0,)
 
-        if self.edge:
+        if self.edge and not self.inPath:
+
             pygame.draw.rect(screen, (0, 0, 0), self.rectang, 0,)
-    
+
+        if self.inPath:
+
+            pygame.draw.rect(screen, self.pathCol, self.rectang, 0,)
+
+
     def getPosition(self,):
         return self.position
 
@@ -189,6 +200,14 @@ class node:
         
         return self.parent
 
+    def drawNeighbours(self, screen):
+        for node in self.neighbours:
+            node.traversableCol = (32, 255, 32)
+
+    def setPath(self, data,):
+
+        self.inPath = data
+
 def removeRepeats(data):
     if len(data) >= 1:
         
@@ -206,50 +225,53 @@ def removeRepeats(data):
 
     return data 
 
-def getNeighbour(nodeMatrix):
-    for x in range(len(nodeMatrix)):
-        
-        for y in range(len(nodeMatrix[x])):
+def getNeighbour(nodeMatrix, node,):
 
-            xIncr = 1
+    x = node.getPosition()[0]
 
-            yIncr = 1
+    y = node.getPosition()[1]
 
-            if x == (0 or (len(nodeMatrix))):
+    xIncr = 1
 
-                xIncr = 0
+    yIncr = 1
 
-            elif y == (0 or (len(nodeMatrix[x]))):
+    if x == (0 or (len(nodeMatrix))):
 
-                yIncr = 0
+        xIncr = 0
 
-            possibleNeighbours = [
+    elif y == (0 or (len(nodeMatrix[x]))):
 
-                ((x - xIncr), y),
+        yIncr = 0
 
-                ((x + xIncr), y),
+    possibleNeighbours = [
 
-                (x, (y - yIncr)),
+        ((x - xIncr), y),
 
-                (x, (y + yIncr))
+        ((x + xIncr), y),
 
-            ]
+        (x, (y - yIncr)),
+
+        (x, (y + yIncr))
+
+    ]
+    
+    possibleNeighbours = removeRepeats(possibleNeighbours)
+
+    for position in possibleNeighbours:
+
+        try:
             
-            possibleNeighbours = removeRepeats(possibleNeighbours)
+            if not nodeMatrix[abs(position[0])][abs(position[1])].getVisited():
 
-            for position in possibleNeighbours:
+                node.addNeighbours(nodeMatrix[abs(position[0])][abs(position[1])])
 
-                try:
-                
-                    nodeMatrix[x][y].addNeighbours(nodeMatrix[abs(position[0])][abs(position[1])])
+                neighboursUnsorted = node.getNeighbours()
 
-                    neighboursUnsorted = nodeMatrix[x][y].getNeighbours()
+                neighboursUnsorted = removeRepeats(neighboursUnsorted)
+        
+        except IndexError:
 
-                    neighboursUnsorted = removeRepeats(neighboursUnsorted)
-                
-                except IndexError:
-
-                    continue
+            continue
 
 def generateMazeBase(windowDimensions, nodeWidth, edges,):
 
@@ -289,8 +311,6 @@ def generateMazeBase(windowDimensions, nodeWidth, edges,):
         yList.clear()
 
     nodeMatrix = xList
-
-    getNeighbour(nodeMatrix)
 
     return nodeMatrix
     
