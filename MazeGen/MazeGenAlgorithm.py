@@ -1,4 +1,5 @@
 ##Maze Generation
+from operator import pos
 import pygame
 
 import Vector2Operators
@@ -14,6 +15,8 @@ class node:
         self.width = width
 
         self.neighbours = []
+
+        self.joinedTo = []
 
         self.parent = None
 
@@ -75,6 +78,10 @@ class node:
 
             parentPosition = self.parent.getPosition()
 
+            self.parent.addJoinedTo(self)
+
+            self.joinedTo.append(self.parent)
+
             currentPosition = self.position
 
             deltaPosition = (currentPosition[0] - parentPosition[0]), (currentPosition[1] - parentPosition[1])
@@ -125,6 +132,17 @@ class node:
 
             pygame.draw.rect(screen, self.pathCol, self.rectang, 0,)
 
+    def addJoinedTo(self, data):
+
+        self.joinedTo.append(data)
+
+    def getJoinedTo(self,):
+
+        return self.joinedTo
+
+    def drawAsFrontier(self, screen,):
+
+        pygame.draw.rect(screen, (83, 97, 252), self.rectang, 0,)
 
     def getPosition(self,):
         return self.position
@@ -158,7 +176,12 @@ class node:
         self.neighbours.append(data)
 
     def setTraversable(self, data,):
+
         self.traversable = data
+
+    def getTraversable(self):
+
+        return self.traversable
 
     def getNeighbours(self,):
         
@@ -296,7 +319,7 @@ def generateMazeBase(windowDimensions, nodeWidth, edges,):
 
                 edges.append(Node)
 
-            if xNode+1 == navWidth or yNode+1 == navHeight:
+            elif xNode+1 == navWidth or yNode+1 == navHeight:
 
                 Node.setEState(True)
 

@@ -1,32 +1,22 @@
 import sys
-
 import pygame
-
 import MazeGenAlgorithm
-
 import random
-
 import secrets
-
 from operator import attrgetter, pos
 
 pygame.init()
 
-windowDimensions = (1000,450)
-
+windowDimensions = (1920, 1080)
 bgColour = (8, 8, 8)
 
 edges = []
-
 mazeList = []
-
 openList = []
-
 closedList = []
-
 possibleRoute = []
-
 path = []
+mazeEnd = []
 
 displayName = ("Random Maze Generation Version 0")
 
@@ -35,16 +25,12 @@ displaySurface = pygame.display.set_mode(windowDimensions)
 pygame.display.set_caption(displayName)
 
 running = True
-
 mazeComplete = False
-
 mazeStart = None
-
 mazeEndSel = False
-
 pathFound = False
 
-mazeEnd = []
+
 
 nodeMatrix = MazeGenAlgorithm.generateMazeBase(windowDimensions, 10, edges,)
 
@@ -88,54 +74,76 @@ def randEdge():
     return mazeEdgeNode
 
 
+def randNode():
+    matX = secrets.choice(nodeMatrix)
+
+    node = secrets.choice(matX)
+
+    node.setStart(True)
+
+    return node
+
+
 
 def aStarSearch(openList, closedList):
 
-    currentNode = min(openList, key=attrgetter('totalDist'))
+    pathState = False
 
-    posTemp = currentNode.getPosition()
+    if len(openList) is not 0:
 
-    pygame.draw.rect(displaySurface, (255, 0, 0), (posTemp[0]*10, posTemp[1]*10, 10, 10,), 0,)
-    
-    currentNode.setVisitedByPath(True)
+        currentNode = min(openList, key=attrgetter('totalDist'))
 
-    closedList.append(currentNode)
+        posTemp = currentNode.getPosition()
 
-    openList.remove(currentNode)
-
-    if currentNode == mazeEnd[0]:
-
-
+        pygame.draw.rect(displaySurface, (255, 0, 0), (posTemp[0]*10, posTemp[1]*10, 10, 10,), 0,)
         
-        pathState = True
+        currentNode.setVisitedByPath(True)
 
-        while currentNode is not mazeStart:
+        closedList.append(currentNode)
 
-            path.append(currentNode)
+        openList.remove(currentNode)
 
-            currentNode.setPath(True)
-
-            currentNode = currentNode.getParent()
-
-        return pathState
+        if currentNode == mazeEnd[0]:
 
 
+            
+            pathState = True
+
+            while currentNode is not mazeStart:
+
+                path.append(currentNode)
+
+                currentNode.setPath(True)
+
+                currentNode = currentNode.getParent()
+
+            return pathState
+        else:
+
+            for node in currentNode.getJoinedTo():
+
+                if not node.getEState():
+
+                    if not node.getVisitedByPath():
+
+                        node.setVisitedByPath(True)
+
+                    if node in closedList:
+
+                        continue
+
+                    openList.append(node)
     else:
 
-        for node in currentNode.getNeighbours():
+        pathState = True
 
-            if not node.getEState():
+        openList.clear()
 
-                if not node.getVisitedByPath():
+        closedList.clear()
 
-                    node.setVisitedByPath(True)
+        print("No Path Found")
 
-                if node in closedList:
-
-                    continue
-
-                openList.append(node)
-
+        return pathState
 
 
 mazeStart = randEdge()
@@ -168,11 +176,60 @@ def selectEndNode(mousePosition):
 
         node = nodeMatrix[normalisedMousePosition[0]][normalisedMousePosition[1]]
 
-        node.setEnd(True)
+        if mazeComplete:
+            
+            node.setEnd(True)
 
-        mazeEnd.append(node)
+            mazeEnd.append(node)
 
+        else:
+            pass
 
+        
+pathStack = []
+currentNode = mazeStart
+
+pathStack.append(mazeStart)
+
+def randomBactraceAlgo(mazeState, pathStack):
+
+    if len(pathStack) is not 0:
+
+        currentCell = pathStack[len(pathStack) - 1]
+
+        neighboursUnvisited = []
+
+        pathStack.pop()
+
+        MazeGenAlgorithm.getNeighbour(nodeMatrix, currentCell)
+
+        for neighbour in currentCell.getNeighbours():
+            
+            if not neighbour.getVisited() and not neighbour.getEState() and not neighbour.getTraversable():
+
+                neighboursUnvisited.append(neighbour)
+
+        if len(neighboursUnvisited) is not 0:
+            
+            pathStack.append(currentCell)
+
+            randomCellChoice = secrets.choice(neighboursUnvisited)
+            
+            randomCellChoice.setParent(currentCell)
+
+            randomCellChoice.setVisited(True)
+
+            randomCellChoice.setTraversable(True)
+
+            randomCellChoice.joinToParent()
+
+            pathStack.append(randomCellChoice)
+
+    else:
+        
+        mazeState = not mazeState
+        
+        return True
 
 
 def randomPrimAlgo(possibleRoute, mazeState):
@@ -207,8 +264,6 @@ def randomPrimAlgo(possibleRoute, mazeState):
         return mazeState
 
 
-
-
 while running:
 
     displaySurface.fill(bgColour)
@@ -217,7 +272,9 @@ while running:
 
     if not mazeComplete:
 
-        mazeComplete = randomPrimAlgo(possibleRoute, mazeComplete,)
+        mazeComplete = randomBactraceAlgo(mazeComplete, pathStack)
+
+        ##mazeComplete = randomPrimAlgo(possibleRoute, mazeComplete)
 
     else:
 
@@ -237,10 +294,14 @@ while running:
 
             posTemp = n.getPosition()
 
-            pygame.draw.rect(displaySurface, (255, 102, 0), ((posTemp[0]*10) + 1, (posTemp[1]*10) + 1 , 8, 8,), 0,)
+            pygame.draw.rect(displaySurface, (255, 118, 64), ((posTemp[0]*10) + 1, (posTemp[1]*10) + 1 , 8, 8,), 0,)
 
 
     mazeStart.drawNode(displaySurface)
+
+    for node in pathStack:
+
+        node.drawAsFrontier(displaySurface)
 
     for event in pygame.event.get():
 
@@ -250,7 +311,7 @@ while running:
 
             sys.exit()
 
-        elif event.type == pygame.MOUSEBUTTONDOWN:
+        elif event.type == pygame.MOUSEBUTTONDOWN and mazeComplete:
             if pygame.mouse.get_pressed(num_buttons=3)[0] == True:
                 selectEndNode(pygame.mouse.get_pos())
 
