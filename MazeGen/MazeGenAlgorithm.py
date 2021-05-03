@@ -14,6 +14,10 @@ class node:
 
         self.width = width
 
+        self.inSpanningTree = False
+
+        self.pointsTo = None
+
         self.neighbours = []
 
         self.joinedTo = []
@@ -34,8 +38,6 @@ class node:
 
         self.end = False
 
-        self.hovered = False
-
         self.rectang = [(self.position[0]*10) + 1, (self.position[1]*10) + 1, (self.width - 2), (self.width - 2)]
 
         self.inPath = False
@@ -51,6 +53,22 @@ class node:
         self.distFromEnd = 0
 
         self.totalDist = 0
+
+    def getsPointsTo(self,):
+
+        return self.pointsTo
+
+    def setPointsTo(self, data,):
+
+        self.pointsTo = data
+
+    def getInSpanningTree(self,):
+
+        return self.inSpanningTree
+
+    def setInSpanningTree(self, data,):
+
+        self.inSpanningTree = data
 
     def findDistances(self, start, end,):
 
@@ -283,10 +301,12 @@ def getNeighbour(nodeMatrix, node,):
     for position in possibleNeighbours:
 
         try:
-            
-            if not nodeMatrix[abs(position[0])][abs(position[1])].getVisited():
 
-                node.addNeighbours(nodeMatrix[abs(position[0])][abs(position[1])])
+            neighbour = nodeMatrix[abs(position[0])][abs(position[1])]
+            
+            if not neighbour.getEState() and not neighbour.getVisited():
+
+                node.addNeighbours(neighbour)
 
                 neighboursUnsorted = node.getNeighbours()
 

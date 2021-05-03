@@ -7,7 +7,7 @@ from operator import attrgetter, pos
 
 pygame.init()
 
-windowDimensions = (1920, 1080)
+windowDimensions = (200, 200)
 bgColour = (8, 8, 8)
 
 edges = []
@@ -30,6 +30,8 @@ mazeStart = None
 mazeEndSel = False
 pathFound = False
 
+maxWilsonPathLength = 10
+
 
 
 nodeMatrix = MazeGenAlgorithm.generateMazeBase(windowDimensions, 10, edges,)
@@ -45,10 +47,6 @@ def checkPos(mousePosition):
         pygame.draw.rect(displaySurface, (255, 91, 69, 10), (normalisedMousePosition[0] * 10, normalisedMousePosition[1] * 10, 10, 10), 2,)
 
 
-
-
-
-
 def drawNodes(nodeMat):
 
     matrix = nodeMat
@@ -58,7 +56,6 @@ def drawNodes(nodeMat):
         for y in x:
 
             y.drawNode(displaySurface)
-
 
 
 def randEdge():
@@ -82,7 +79,6 @@ def randNode():
     node.setStart(True)
 
     return node
-
 
 
 def aStarSearch(openList, closedList):
@@ -149,7 +145,6 @@ def aStarSearch(openList, closedList):
 mazeStart = randEdge()
 
 
-
 possibleRoute.append(mazeStart)
 
 
@@ -187,9 +182,56 @@ def selectEndNode(mousePosition):
 
         
 pathStack = []
-currentNode = mazeStart
+
+spanningTree = []
+
+nodeBuffer = []
+
+spanningTree.append(mazeStart)
+
+walking = False
+
+unvisitedNodes = []
+
+for i in nodeMatrix:
+
+    for node in i:
+
+        if not node.getEState():
+
+            unvisitedNodes.append(node)
+
+pathLen = 0
 
 pathStack.append(mazeStart)
+
+def walk(fromNode, through, maxLen):
+
+    walking = True
+
+    current = fromNode
+
+    iteration = 0
+
+    while walking:
+
+        iteration += 1
+
+        if iteration == maxLen:
+
+            return False
+
+        else:
+
+            currentNeigh = secrets.choice(current.getNeighbours())
+
+            if currentNeigh.getInSpanningTree():
+                pass
+
+            else:
+
+                continue               
+ 
 
 def randomBactraceAlgo(mazeState, pathStack):
 
@@ -264,6 +306,31 @@ def randomPrimAlgo(possibleRoute, mazeState):
         return mazeState
 
 
+def wilsonsAlgo(mazeState, spanningTree, verts, isWalking, buffer):
+
+    if len(verts) is not 0:
+
+        if not isWalking:
+
+            buffer.clear()
+
+            point = secrets.choice(unvisitedNodes)
+
+            buffer.append(point)
+
+            isWalking = True
+
+        else:
+
+            point = buffer[0]
+    else:
+
+        return not mazeState
+
+
+
+
+
 while running:
 
     displaySurface.fill(bgColour)
@@ -272,9 +339,9 @@ while running:
 
     if not mazeComplete:
 
-        mazeComplete = randomBactraceAlgo(mazeComplete, pathStack)
+        ##mazeComplete = randomBactraceAlgo(mazeComplete, pathStack)
 
-        ##mazeComplete = randomPrimAlgo(possibleRoute, mazeComplete)
+        mazeComplete = randomPrimAlgo(possibleRoute, mazeComplete)
 
     else:
 
