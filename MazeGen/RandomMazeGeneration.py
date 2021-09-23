@@ -1,22 +1,19 @@
 import sys
 import pygame
 import MazeGenAlgorithm
-import random
 import secrets
 from operator import attrgetter, pos
 
 pygame.init()
 
-windowDimensions = (200, 200)
+windowDimensions = (800, 600)
 bgColour = (8, 8, 8)
 
 edges = []
-mazeList = []
 openList = []
 closedList = []
 possibleRoute = []
 path = []
-mazeEnd = []
 
 displayName = ("Random Maze Generation Version 0")
 
@@ -29,9 +26,6 @@ mazeComplete = False
 mazeStart = None
 mazeEndSel = False
 pathFound = False
-
-maxWilsonPathLength = 10
-
 
 
 nodeMatrix = MazeGenAlgorithm.generateMazeBase(windowDimensions, 10, edges,)
@@ -81,255 +75,21 @@ def randNode():
     return node
 
 
-def aStarSearch(openList, closedList):
-
-    pathState = False
-
-    if len(openList) is not 0:
-
-        currentNode = min(openList, key=attrgetter('totalDist'))
-
-        posTemp = currentNode.getPosition()
-
-        pygame.draw.rect(displaySurface, (255, 0, 0), (posTemp[0]*10, posTemp[1]*10, 10, 10,), 0,)
-        
-        currentNode.setVisitedByPath(True)
-
-        closedList.append(currentNode)
-
-        openList.remove(currentNode)
-
-        if currentNode == mazeEnd[0]:
-
-
-            
-            pathState = True
-
-            while currentNode is not mazeStart:
-
-                path.append(currentNode)
-
-                currentNode.setPath(True)
-
-                currentNode = currentNode.getParent()
-
-            return pathState
-        else:
-
-            for node in currentNode.getJoinedTo():
-
-                if not node.getEState():
-
-                    if not node.getVisitedByPath():
-
-                        node.setVisitedByPath(True)
-
-                    if node in closedList:
-
-                        continue
-
-                    openList.append(node)
-    else:
-
-        pathState = True
-
-        openList.clear()
-
-        closedList.clear()
-
-        print("No Path Found")
-
-        return pathState
-
-
 mazeStart = randEdge()
 
 
 possibleRoute.append(mazeStart)
-
-
-def selectEndNode(mousePosition):
-
-    openList.clear()
-
-    closedList.clear()
-
-    
-    openList.append(mazeStart)
-
-    if mazeComplete == True:
-
-        if len(mazeEnd) > 0:
-
-            for i in mazeEnd:
-
-                i.setEnd(False)
-
-        mazeEnd.clear()
-
-        normalisedMousePosition = mousePosition[0]//10, mousePosition[1]//10
-
-        node = nodeMatrix[normalisedMousePosition[0]][normalisedMousePosition[1]]
-
-        if mazeComplete:
-            
-            node.setEnd(True)
-
-            mazeEnd.append(node)
-
-        else:
-            pass
-
         
 pathStack = []
 
-spanningTree = []
-
 nodeBuffer = []
-
-spanningTree.append(mazeStart)
 
 walking = False
 
 unvisitedNodes = []
 
-for i in nodeMatrix:
-
-    for node in i:
-
-        if not node.getEState():
-
-            unvisitedNodes.append(node)
-
-pathLen = 0
-
-pathStack.append(mazeStart)
-
-def walk(fromNode, through, maxLen):
-
-    walking = True
-
-    current = fromNode
-
-    iteration = 0
-
-    while walking:
-
-        iteration += 1
-
-        if iteration == maxLen:
-
-            return False
-
-        else:
-
-            currentNeigh = secrets.choice(current.getNeighbours())
-
-            if currentNeigh.getInSpanningTree():
-                pass
-
-            else:
-
-                continue               
+pathStack.append(mazeStart)  
  
-
-def randomBactraceAlgo(mazeState, pathStack):
-
-    if len(pathStack) is not 0:
-
-        currentCell = pathStack[len(pathStack) - 1]
-
-        neighboursUnvisited = []
-
-        pathStack.pop()
-
-        MazeGenAlgorithm.getNeighbour(nodeMatrix, currentCell)
-
-        for neighbour in currentCell.getNeighbours():
-            
-            if not neighbour.getVisited() and not neighbour.getEState() and not neighbour.getTraversable():
-
-                neighboursUnvisited.append(neighbour)
-
-        if len(neighboursUnvisited) is not 0:
-            
-            pathStack.append(currentCell)
-
-            randomCellChoice = secrets.choice(neighboursUnvisited)
-            
-            randomCellChoice.setParent(currentCell)
-
-            randomCellChoice.setVisited(True)
-
-            randomCellChoice.setTraversable(True)
-
-            randomCellChoice.joinToParent()
-
-            pathStack.append(randomCellChoice)
-
-    else:
-        
-        mazeState = not mazeState
-        
-        return True
-
-
-def randomPrimAlgo(possibleRoute, mazeState):
-
-
-    if len(possibleRoute) != 0:
-
-        current = secrets.choice(possibleRoute)
-
-        current.setTraversable(True)
-
-        possibleRoute.remove(current)
-
-        current.joinToParent()
-
-        MazeGenAlgorithm.getNeighbour(nodeMatrix, current)
-
-        for neighbour in current.getNeighbours():
-                
-            if not neighbour.getVisited() and not neighbour.getEState():
-
-                neighbour.setVisited(True)
-
-                neighbour.setParent(current)
-
-                possibleRoute.append(neighbour)
-
-    else:
-
-        mazeState = not mazeState
-
-        return mazeState
-
-
-def wilsonsAlgo(mazeState, spanningTree, verts, isWalking, buffer):
-
-    if len(verts) is not 0:
-
-        if not isWalking:
-
-            buffer.clear()
-
-            point = secrets.choice(unvisitedNodes)
-
-            buffer.append(point)
-
-            isWalking = True
-
-        else:
-
-            point = buffer[0]
-    else:
-
-        return not mazeState
-
-
-
-
 
 while running:
 
@@ -339,17 +99,17 @@ while running:
 
     if not mazeComplete:
 
-        ##mazeComplete = randomBactraceAlgo(mazeComplete, pathStack)
+        print("maze creation loop")
 
-        mazeComplete = randomPrimAlgo(possibleRoute, mazeComplete)
+        ##place the maze generation algorithms in here.
+
+        pass
 
     else:
 
         checkPos(pygame.mouse.get_pos())
 
     if mazeEndSel and mazeComplete and not pathFound:
-
-        pathFound = aStarSearch(openList, closedList)
 
         for i in openList:
 
@@ -380,7 +140,6 @@ while running:
 
         elif event.type == pygame.MOUSEBUTTONDOWN and mazeComplete:
             if pygame.mouse.get_pressed(num_buttons=3)[0] == True:
-                selectEndNode(pygame.mouse.get_pos())
 
                 pathFound = False
 
@@ -388,11 +147,6 @@ while running:
                     i.setPath(False)
 
                 path.clear()
-
-                for x in range(len(nodeMatrix)):
-                    for y in range(len(nodeMatrix[x])):
-                        if mazeComplete:
-                            nodeMatrix[x][y].findDistances(mazeStart, mazeEnd[0])
 
                 mazeEndSel = True
             
